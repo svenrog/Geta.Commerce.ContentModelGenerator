@@ -37,6 +37,7 @@ namespace Geta.Commerce.ContentModelGenerator
 
             var metaClassProperties = new Dictionary<MetaClass, IList<MetaField>>();
             var commonProperties = new Dictionary<CommerceContentType, ISet<MetaField>>();
+
             var baseClasses = new Dictionary<CommerceContentType, string>();
 
             foreach (var metaClass in metaClasses)
@@ -135,10 +136,13 @@ namespace Geta.Commerce.ContentModelGenerator
         {
             if (metaFields == null) return;
 
+            var protectedProperties = builder.GetProtectedProperties();
+
             foreach (var metaField in metaFields)
             {
+                if (protectedProperties.Contains(metaField.Name)) continue;
                 if (!metaField.Type.IsValidType()) continue;
-
+                
                 ValidateBuilderUsingDirective(builder, metaField.Type);
 
                 var attributes = new List<AttributeDefinition>();
@@ -194,9 +198,13 @@ namespace Geta.Commerce.ContentModelGenerator
         {
             if (parent.Equals(1)) return CommerceContentType.Category;
 
-            if (name.Contains("Bundle")) return CommerceContentType.Bundle;
-            if (name.Contains("Item")) return CommerceContentType.Variation;
+            if (name.Contains("Activity")) return CommerceContentType.Product;
+            if (name.Contains("Campaign")) return CommerceContentType.Product;
+            if (name.Contains("Specification")) return CommerceContentType.Product;
             if (name.Contains("Product")) return CommerceContentType.Product;
+            if (name.Contains("Item")) return CommerceContentType.Variation;
+            if (name.Contains("Variation")) return CommerceContentType.Variation;
+            if (name.Contains("Bundle")) return CommerceContentType.Bundle;
 
             return CommerceContentType.Entry;
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Geta.Commerce.ContentModelGenerator.Comparers;
@@ -75,6 +76,11 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
             builder.AppendLine("}");
 
             return builder.ToString();
+        }
+
+        public virtual ISet<string> GetProtectedProperties()
+        {
+            return new HashSet<string>(StringComparer.Ordinal);
         }
 
         protected virtual string ComposeUsingDeclaration(string nameSpace)

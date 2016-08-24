@@ -35,6 +35,19 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
             return result;
         }
 
+        public override ISet<string> GetProtectedProperties()
+        {
+            return new HashSet<string>(StringComparer.Ordinal)
+            {
+                "Name",
+                "ContentLink",
+                "ParentLink",
+                "ContentGuid",
+                "ContentTypeID",
+                "IsDeleted"
+            };
+        }
+
         public virtual AttributeDefinition GetContentTypeAttribute(string name, string description = null, int? order = null, string group = null, bool availableInEditMode = true)
         {
             var properties = new Dictionary<string, string>

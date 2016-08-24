@@ -1,4 +1,6 @@
-﻿using Geta.Commerce.ContentModelGenerator.Extensions;
+﻿using System;
+using System.Collections.Generic;
+using Geta.Commerce.ContentModelGenerator.Extensions;
 using Geta.Commerce.ContentModelGenerator.Structure;
 
 namespace Geta.Commerce.ContentModelGenerator.Builders
@@ -26,7 +28,21 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
             if (!UsingNameSpaces.Contains("EPiServer.Commerce.Catalog.ContentTypes"))
                 UsingNameSpaces.Add("EPiServer.Commerce.Catalog.ContentTypes");
         }
-        
+
+        public override ISet<string> GetProtectedProperties()
+        {
+            var properties = base.GetProtectedProperties();
+
+            properties.Add("DisplayName");
+            properties.Add("Language");
+            properties.Add("MasterLanguage");
+            properties.Add("StartPublish");
+            properties.Add("StopPublish");
+            properties.Add("Status");
+
+            return properties;
+        }
+
         public virtual AttributeDefinition GetContentTypeAttribute(string name, string metaclass, string description = null)
         {
             var attribute = base.GetContentTypeAttribute(name, description);
