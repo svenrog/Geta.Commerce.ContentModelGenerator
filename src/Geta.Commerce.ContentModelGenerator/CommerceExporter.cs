@@ -28,6 +28,11 @@ namespace Geta.Commerce.ContentModelGenerator
             WriteBuilders(builders);
         }
 
+        protected virtual bool ValidatePropertyForBaseClass(CommerceContentType type, string name)
+        {
+            return true;
+        }
+
         protected virtual IList<ClassBuilder> GenerateBuilders()
         {
             var result = new List<ClassBuilder>();
@@ -62,6 +67,7 @@ namespace Geta.Commerce.ContentModelGenerator
                         foreach (var metaField in metaClassKeyValue.Value)
                         {
                             if (commonProperties[group.Key].Contains(metaField)) continue;
+                            if (!ValidatePropertyForBaseClass(group.Key, metaField.Name)) continue;
                             if (!group.Select(x => x.Value).All(x => x.Any(y => y.Equals(metaField)))) continue;
 
                             commonProperties[group.Key].Add(metaField);
@@ -100,9 +106,7 @@ namespace Geta.Commerce.ContentModelGenerator
 
         protected virtual ClassBuilder GetBaseClassBuilder(CommerceContentType type, IEnumerable<MetaField> metaFields)
         {
-            var name = string.Format("{0}{1}", type, "ContentBase");
-            
-            var builder = new CommerceContentModelBuilder(name, NameSpace);
+            var builder = new CommerceContentModelBuilder($"{type}ContentBase", NameSpace);
 
             builder.SetContentType(type);
 
@@ -202,6 +206,7 @@ namespace Geta.Commerce.ContentModelGenerator
             if (name.Contains("Campaign")) return CommerceContentType.Product;
             if (name.Contains("Specification")) return CommerceContentType.Product;
             if (name.Contains("Product")) return CommerceContentType.Product;
+            if (name.Contains("Package")) return CommerceContentType.Package;
             if (name.Contains("Item")) return CommerceContentType.Variation;
             if (name.Contains("Variation")) return CommerceContentType.Variation;
             if (name.Contains("Bundle")) return CommerceContentType.Bundle;
