@@ -38,10 +38,8 @@ namespace Geta.Commerce.ContentModelGenerator
             }
         }
 
-        protected virtual void WriteBuilders(IList<ClassBuilder> builders)
+        protected virtual void WriteBuilders(IEnumerable<ClassBuilder> builders)
         {
-            if (builders == null || !builders.Any()) return;
-
             foreach (var builder in builders)
             {
                 using (var stream = new FileStream(GetExportFilePath(builder), FileMode.Create))

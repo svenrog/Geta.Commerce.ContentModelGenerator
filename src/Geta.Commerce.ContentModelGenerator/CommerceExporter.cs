@@ -33,16 +33,15 @@ namespace Geta.Commerce.ContentModelGenerator
             return true;
         }
 
-        protected virtual IList<ClassBuilder> GenerateBuilders()
+        protected virtual IEnumerable<ClassBuilder> GenerateBuilders()
         {
-            var result = new List<ClassBuilder>();
+            var result = new HashSet<ClassBuilder>();
             var metaClasses = GetMetaClasses();
 
             if (metaClasses == null) return result;
 
             var metaClassProperties = new Dictionary<MetaClass, IList<MetaField>>();
             var commonProperties = new Dictionary<CommerceContentType, ISet<MetaField>>();
-
             var baseClasses = new Dictionary<CommerceContentType, string>();
 
             foreach (var metaClass in metaClasses)

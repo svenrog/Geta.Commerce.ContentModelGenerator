@@ -56,12 +56,16 @@
     <Compile Include="Extensions\StringBuilderExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="IExporter.cs" />
+    <Compile Include="Parsers\ClassParser.cs" />
+    <Compile Include="Parsers\Keywords.cs" />
+    <Compile Include="Parsers\ParserState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structure\AttributeDefinition.cs" />
     <Compile Include="Structure\CommerceContentType.cs" />
     <Compile Include="Structure\PropertyDefinition.cs" />
     <Compile Include="Structure\ProtectionLevel.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
