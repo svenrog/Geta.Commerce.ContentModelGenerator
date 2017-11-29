@@ -3,16 +3,15 @@ using System.Configuration;
 using System.IO;
 using System.Text;
 using Geta.Commerce.ContentModelGenerator.Access;
-using CommandLine;
-using Geta.Commerce.ContentModelGenerator.Builders;
 using Geta.Commerce.ContentModelGenerator.Parsers;
+using CommandLine;
 
 namespace Geta.Commerce.ContentModelGenerator.Example
 {
     class Program
     {
-        const string _connectionName = "EcfSqlConnection";
-        const string _connectionDefaultProvider = "System.Data.SqlClient";
+        const string ConnectionName = "EcfSqlConnection";
+        const string ConnectionDefaultProvider = "System.Data.SqlClient";
 
         static void Main(string[] args)
         {
@@ -24,9 +23,13 @@ namespace Geta.Commerce.ContentModelGenerator.Example
             }
 
             if (!string.IsNullOrEmpty(options.Assemblies))
+            {
                 ReadClasses(options);
-            
-            //GenerateClasses(options);
+            }
+            else
+            {
+                GenerateClasses(options);
+            }
         }
 
         static void ReadClasses(Options options)
@@ -60,11 +63,11 @@ namespace Geta.Commerce.ContentModelGenerator.Example
 
                 if (string.IsNullOrEmpty(options.ConnectionString))
                 {
-                    configuration = ConfigurationManager.ConnectionStrings[_connectionName];
+                    configuration = ConfigurationManager.ConnectionStrings[ConnectionName];
                 }
                 else
                 {
-                    configuration = new ConnectionStringSettings(_connectionName, options.ConnectionString, options.ConnectionProvider ?? _connectionDefaultProvider);
+                    configuration = new ConnectionStringSettings(ConnectionName, options.ConnectionString, options.ConnectionProvider ?? ConnectionDefaultProvider);
                 }
 
                 if (configuration == null) throw new ConfigurationErrorsException();
@@ -80,7 +83,7 @@ namespace Geta.Commerce.ContentModelGenerator.Example
             }
             catch (ConfigurationErrorsException)
             {
-                Console.WriteLine("Provide a connection with name '{0}' in the application configuration or supply a -c argument.", _connectionName);
+                Console.WriteLine("Provide a connection with name '{0}' in the application configuration or supply a -c argument.", ConnectionName);
             }
             catch (Exception ex)
             {
