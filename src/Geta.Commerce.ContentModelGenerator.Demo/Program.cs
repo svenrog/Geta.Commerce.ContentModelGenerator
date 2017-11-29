@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
+using System.Text;
 using Geta.Commerce.ContentModelGenerator.Access;
 using CommandLine;
+using Geta.Commerce.ContentModelGenerator.Builders;
+using Geta.Commerce.ContentModelGenerator.Parsers;
 
 namespace Geta.Commerce.ContentModelGenerator.Example
 {
@@ -19,6 +23,37 @@ namespace Geta.Commerce.ContentModelGenerator.Example
                 return;
             }
 
+            if (!string.IsNullOrEmpty(options.Assemblies))
+                ReadClasses(options);
+            
+            //GenerateClasses(options);
+        }
+
+        static void ReadClasses(Options options)
+        {
+            try
+            {
+                var classCompiler = new ClassCompiler(options.Assemblies, options.NameSpace);
+                var classFiles = Directory.GetFiles(options.Path, "*.cs");
+                var builders = classCompiler.ParseFiles(classFiles);
+
+                foreach (var builder in builders)
+                {
+                    using (var stream = new FileStream($"c:\\temp\\{builder.ClassName}.cs", FileMode.Create))
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(builder.ToString());
+                        stream.Write(bytes, 0, bytes.Length);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        static void GenerateClasses(Options options)
+        {
             try
             {
                 ConnectionStringSettings configuration;
@@ -45,11 +80,11 @@ namespace Geta.Commerce.ContentModelGenerator.Example
             }
             catch (ConfigurationErrorsException)
             {
-                Console.Write("Provide a connection with name '{0}' in the application configuration or supply a -c argument.", _connectionName);
+                Console.WriteLine("Provide a connection with name '{0}' in the application configuration or supply a -c argument.", _connectionName);
             }
             catch (Exception ex)
             {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
             }
         }
     }

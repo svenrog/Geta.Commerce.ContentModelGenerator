@@ -4,7 +4,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Geta.Commerce.ContentModelGenerator.Extensions;
 using Geta.Commerce.ContentModelGenerator.Structure;
-
 namespace Geta.Commerce.ContentModelGenerator.Builders
 {
     public class EPiServerContentModelBuilder : ClassBuilder

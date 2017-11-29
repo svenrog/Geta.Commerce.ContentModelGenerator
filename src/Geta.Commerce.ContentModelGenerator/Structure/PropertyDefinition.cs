@@ -9,6 +9,8 @@ namespace Geta.Commerce.ContentModelGenerator.Structure
         public string Name { get; set; } 
         public string Type { get; set; }
 
+        public string Lambda { get; set; }
+
         private ProtectionLevel _protection = ProtectionLevel.Public;
         public ProtectionLevel Protection { get { return _protection; } set { _protection = value; } }
 
@@ -19,6 +21,8 @@ namespace Geta.Commerce.ContentModelGenerator.Structure
         public bool Set { get { return _set; } set { _set = value; } }
 
         private bool _virtual = true;
+
+        
 
         public bool Virtual
         {
