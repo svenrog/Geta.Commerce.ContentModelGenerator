@@ -14,18 +14,18 @@ namespace Geta.Commerce.ContentModelGenerator
 
         public CommerceExporter(string path, string nameSpace) : base(path, nameSpace) {}
 
-        public override void Export()
+        public override void Export(IEnumerable<ClassBuilder> builders)
         {
-            base.Export();
+            var classBuilders = builders as ClassBuilder[] ?? builders.ToArray();
+
+            base.Export(classBuilders);
 
             if (!Directory.Exists(ExportDirectoryPath))
             {
                 Directory.CreateDirectory(ExportDirectoryPath);
             }
 
-            var builders = GenerateBuilders();
-
-            WriteBuilders(builders);
+            WriteBuilders(classBuilders);
         }
 
         protected virtual bool ValidatePropertyForBaseClass(CommerceContentType type, string name)
@@ -33,12 +33,12 @@ namespace Geta.Commerce.ContentModelGenerator
             return true;
         }
 
-        protected virtual IEnumerable<ClassBuilder> GenerateBuilders()
+        public virtual IEnumerable<ClassBuilder> GenerateBuilders(IDictionary<string, ClassBuilder> existingBuilders = null)
         {
-            var result = new HashSet<ClassBuilder>();
+            var result = existingBuilders ?? new Dictionary<string, ClassBuilder>();
             var metaClasses = GetMetaClasses();
 
-            if (metaClasses == null) return result;
+            if (metaClasses == null) return result.Values;
 
             var metaClassProperties = new Dictionary<MetaClass, IList<MetaField>>();
             var commonProperties = new Dictionary<CommerceContentType, ISet<MetaField>>();
@@ -79,9 +79,18 @@ namespace Geta.Commerce.ContentModelGenerator
                     if (!keyValue.Value.Any()) continue;
 
                     var builder = GetBaseClassBuilder(keyValue.Key, keyValue.Value);
+                    var fullname = GetFullName(builder);
 
                     baseClasses.Add(keyValue.Key, builder.ClassName);
-                    result.Add(builder);
+
+                    if (result.ContainsKey(fullname))
+                    {
+                        result[fullname].Merge(builder);
+                    }
+                    else
+                    {
+                        result.Add(fullname, builder);
+                    }
                 }
             }
 
@@ -97,10 +106,24 @@ namespace Geta.Commerce.ContentModelGenerator
                                             keyValue.Value.Where(x => !commonProperties[contentType].Contains(x)) :
                                             keyValue.Value,
                                          inherits);
-                result.Add(builder);
+
+                var fullname = GetFullName(builder);
+                if (result.ContainsKey(fullname))
+                {
+                    result[fullname].Merge(builder);
+                }
+                else
+                {
+                    result.Add(fullname, builder);
+                }
             }
 
-            return result;
+            return result.Values;
+        }
+
+        protected virtual string GetFullName(ClassBuilder builder)
+        {
+            return $"{NameSpace}.{builder.ClassName}";
         }
 
         protected virtual ClassBuilder GetBaseClassBuilder(CommerceContentType type, IEnumerable<MetaField> metaFields)

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Text;
+using System.Linq;
 using Geta.Commerce.ContentModelGenerator.Access;
 using Geta.Commerce.ContentModelGenerator.Parsers;
 using CommandLine;
+using Geta.Commerce.ContentModelGenerator.Builders;
 
 namespace Geta.Commerce.ContentModelGenerator.Example
 {
@@ -22,17 +24,17 @@ namespace Geta.Commerce.ContentModelGenerator.Example
                 return;
             }
 
+            IDictionary<string, ClassBuilder> builders = null;
+
             if (!string.IsNullOrEmpty(options.Assemblies))
             {
-                ReadClasses(options);
+                builders = ReadClasses(options);
             }
-            else
-            {
-                GenerateClasses(options);
-            }
+
+            GenerateClasses(options, builders);
         }
 
-        static void ReadClasses(Options options)
+        static IDictionary<string, ClassBuilder> ReadClasses(Options options)
         {
             try
             {
@@ -40,22 +42,17 @@ namespace Geta.Commerce.ContentModelGenerator.Example
                 var classFiles = Directory.GetFiles(options.Path, "*.cs");
                 var builders = classCompiler.ParseFiles(classFiles);
 
-                foreach (var builder in builders)
-                {
-                    using (var stream = new FileStream($"c:\\temp\\{builder.ClassName}.cs", FileMode.Create))
-                    {
-                        var bytes = Encoding.UTF8.GetBytes(builder.ToString());
-                        stream.Write(bytes, 0, bytes.Length);
-                    }
-                }
+                return builders.ToDictionary(x => $"{x.NameSpace}.{x.ClassName}");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+
+            return null;
         }
 
-        static void GenerateClasses(Options options)
+        static void GenerateClasses(Options options, IDictionary<string, ClassBuilder> builders = null)
         {
             try
             {
@@ -79,7 +76,9 @@ namespace Geta.Commerce.ContentModelGenerator.Example
                     GenerateBaseClasses = options.GenerateBaseClasses
                 };
 
-                exporter.Export();
+                var classBuilders = exporter.GenerateBuilders(builders);
+
+                exporter.Export(classBuilders);
             }
             catch (ConfigurationErrorsException)
             {

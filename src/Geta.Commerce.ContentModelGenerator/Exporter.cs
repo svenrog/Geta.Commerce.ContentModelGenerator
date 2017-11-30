@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Geta.Commerce.ContentModelGenerator.Builders;
 
@@ -20,7 +19,7 @@ namespace Geta.Commerce.ContentModelGenerator
             ThrowErrorIfMisconfigured();
         }
 
-        public virtual void Export()
+        public virtual void Export(IEnumerable<ClassBuilder> builders)
         {
             ThrowErrorIfMisconfigured();
         }

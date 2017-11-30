@@ -63,6 +63,7 @@
     <Compile Include="Data\Access\MetaClassDb.cs" />
     <Compile Include="Data\Access\MetaFieldDb.cs" />
     <Compile Include="Exporter.cs" />
+    <Compile Include="Extensions\ClassBuilderExtensions.cs" />
     <Compile Include="Extensions\StringBuilderExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />

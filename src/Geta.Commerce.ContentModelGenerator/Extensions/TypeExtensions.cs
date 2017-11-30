@@ -13,31 +13,48 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
             var genericArguments = type.GetGenericArguments();
             if (genericArguments.Length == 0)
             {
-                return type.Name;
+                return type.Name.GetAlias();
             }
             
             var typeBaseName = type.Name.Substring(0, type.Name.IndexOf("`", StringComparison.InvariantCulture));
 
-            return $"{typeBaseName}<{string.Join(",", genericArguments.Select(ToTypeName))}>";
+            return $"{typeBaseName.GetAlias()}<{string.Join(",", genericArguments.Select(ToTypeName))}>";
         }
 
-        public static string ToInheritsDeclaration(this Type type)
+        private static string GetAlias(this string typeName)
+        {
+            if (Constants.TypeAliases.ContainsKey(typeName))
+                return Constants.TypeAliases[typeName];
+
+            return typeName;
+        }
+
+        public static string ToInheritsDeclaration(this Type type, out ISet<string> namespaces)
         {
             var result = new List<string>();
+            namespaces = new HashSet<string>();
 
             // Todo: Extract generic type constraints
             var constraints = new List<string>();
 
             if (type.BaseType != null)
-                result.Add(type.BaseType.ToTypeName());
-
-            var interfaces = type.GetImmediateInterfaces();
-            foreach (var face in interfaces)
             {
-                if (face.IsAssignableFrom(type.BaseType))
+                if (type.BaseType.Namespace != null && !namespaces.Contains(type.BaseType.Namespace))
+                    namespaces.Add(type.BaseType.Namespace);
+
+                result.Add(type.BaseType.ToTypeName());
+            }
+            
+            var interfaces = type.GetImmediateInterfaces();
+            foreach (var @interface in interfaces)
+            {
+                if (@interface.IsAssignableFrom(type.BaseType))
                     continue;
 
-                result.Add(face.ToTypeName());
+                if (@interface.Namespace != null && !namespaces.Contains(@interface.Namespace))
+                    namespaces.Add(@interface.Namespace);
+
+                result.Add(@interface.ToTypeName());
             }
 
             return string.Join(", ", result);
@@ -60,7 +77,7 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
             {
                 if (argument.Value == null) continue;
 
-                contents.Add($"{argument.Value}");
+                contents.Add(FormatCustomAttributeArgumentValue(argument));
             }
 
             if (data.NamedArguments != null)
@@ -69,7 +86,7 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
                 {
                     if (argument.TypedValue.Value == null) continue;
 
-                    contents.Add($"{argument.MemberName} = {argument.TypedValue.Value}");
+                    contents.Add($"{argument.MemberName} = {FormatCustomAttributeArgumentValue(argument.TypedValue)}");
                 }
             }
             
@@ -77,6 +94,23 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
             definition.Contents = string.Join(", ", contents);
 
             return definition;
+        }
+
+        private static string FormatCustomAttributeArgumentValue(CustomAttributeTypedArgument argument)
+        {
+            if (typeof(string).IsAssignableFrom(argument.ArgumentType))
+                return $"\"{argument.Value}\"";
+
+            if (typeof(Type).IsAssignableFrom(argument.ArgumentType))
+                return $"typeof({((Type) argument.Value).ToTypeName()})";
+
+            if (typeof(decimal).IsAssignableFrom(argument.ArgumentType))
+                return $"{argument.Value}m";
+
+            if (typeof(float).IsAssignableFrom(argument.ArgumentType))
+                return $"{argument.Value}f";
+
+            return $"{argument.Value}";
         }
     }
 }

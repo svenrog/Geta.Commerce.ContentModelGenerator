@@ -16,6 +16,25 @@ namespace Geta.Commerce.ContentModelGenerator
             "MetaObject"
         };
 
+        public static readonly IDictionary<string, string> TypeAliases = new Dictionary<string, string>
+        {
+            { "Int32", "int" },
+            { "Int64", "long" },
+            { "Int16", "short" },
+            { "Uint32", "uint" },
+            { "Uint64", "ulong" },
+            { "Uint16", "ushort" },
+            { "Byte", "byte" },
+            { "SByte", "sbyte" },
+            { "Boolean", "bool" },
+            { "Float", "float" },
+            { "Double", "double" },
+            { "Decimal", "decimal" },
+            { "String", "string" },
+            { "Char", "char" },
+            { "Enum", "enum" }
+        };
+
         public static readonly IDictionary<string, string> TypeMappings = new Dictionary<string, string>
         {
             { "UniqueIdentifier", "Guid" },

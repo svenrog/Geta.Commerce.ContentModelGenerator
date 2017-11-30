@@ -1,7 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,14 +18,20 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
     {
         protected readonly CodeDomProvider CodeProvider;
         protected readonly CompilerParameters CompilerParameters;
-        protected readonly string NameSpace;
+        protected readonly string Namespace;
         protected readonly string OutputFile;
+        protected readonly string[] Assemblies;
         protected StreamReader Reader;
 
         public ClassCompiler(string assemblyPath, string nameSpace)
         {
+            if (!Directory.Exists(AssemblyDirectory))
+            {
+                Directory.CreateDirectory(AssemblyDirectory);
+            }
+
             CodeProvider = new CSharpCodeProvider();
-            OutputFile = $"{assemblyPath}\\compiled.dll";
+            OutputFile = $"{AssemblyDirectory}\\Geta.Commerce.ContentModelGenerator.Generated.dll";
 
             CompilerParameters = new CompilerParameters
             {
@@ -34,21 +39,16 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
                 OutputAssembly = OutputFile
             };
 
-            var assemblies = Directory.GetFiles(assemblyPath, "*.dll")
-                                      .Where(x => !x.EndsWith("System.Runtime.dll"))
-                                      .ToArray();            
+            Assemblies = Directory.GetFiles(assemblyPath, "*.dll")
+                                  .Where(x => !x.EndsWith("System.Runtime.dll"))
+                                  .ToArray();
 
-            var defaultAssemblies = new []
-            {
-                "System.ComponentModel.DataAnnotations.dll"
-            };
+            CompilerParameters.ReferencedAssemblies.Add("System.ComponentModel.DataAnnotations.dll");
+            CompilerParameters.ReferencedAssemblies.AddRange(Assemblies);
 
-            CompilerParameters.ReferencedAssemblies.AddRange(defaultAssemblies);
-            CompilerParameters.ReferencedAssemblies.AddRange(assemblies);
-
-            NameSpace = nameSpace;
+            Namespace = nameSpace;
         }
-
+        
         public ClassBuilder[] ParseFiles(string[] files)
         {
             var result = CodeProvider.CompileAssemblyFromFile(CompilerParameters, files);
@@ -59,7 +59,12 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
             }
 
             if (result.Errors.HasErrors)
+            {
+                Console.ReadKey();
                 throw new Exception("Build failed");
+            }
+
+            CopyAssembliesForRuntime();
 
             return GetBuilders(result.CompiledAssembly);
         }
@@ -76,7 +81,6 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message, ex);
-
                 types = new Type[0];
             }
 
@@ -92,11 +96,14 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
 
         protected virtual ClassBuilder GetBuilder(Type type)
         {
-            var builder = new ClassBuilder(type.Name, type.Namespace, type.ToInheritsDeclaration());
+            var builder = new ClassBuilder(type.Name, type.Namespace, type.ToInheritsDeclaration(out ISet<string> namespaces));
 
             var classAttributes = type.GetCustomAttributesData();
             foreach (var attribute in classAttributes)
             {
+                if (attribute.AttributeType.Namespace != null && !namespaces.Contains(attribute.AttributeType.Namespace))
+                    namespaces.Add(attribute.AttributeType.Namespace);
+
                 var definition = attribute.ToAttributeDefinition();
                 builder.ClassAttributes.Add(definition);
             }
@@ -109,14 +116,21 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
                     Attributes = new List<AttributeDefinition>()
                 };
 
+                if (property.PropertyType.Namespace != null && !namespaces.Contains(property.PropertyType.Namespace))
+                    namespaces.Add(property.PropertyType.Namespace);
+
                 var attributes = property.GetCustomAttributesData();
                 foreach (var attribute in attributes)
                 {
+                    if (attribute.AttributeType.Namespace != null && !namespaces.Contains(attribute.AttributeType.Namespace))
+                        namespaces.Add(attribute.AttributeType.Namespace);
+
                     var attributeDefinition = attribute.ToAttributeDefinition();
                     definition.Attributes.Add(attributeDefinition);
                 }
 
                 definition.Name = property.Name;
+                definition.Type = property.PropertyType.ToTypeName();
                 definition.Get = property.GetMethod != null;
                 definition.Set = property.SetMethod != null;
                 definition.Virtual = property.GetMethod?.IsVirtual ?? false;
@@ -125,13 +139,38 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
                 builder.Properties.Add(definition);
             }
 
+            foreach (var @namespace in namespaces)
+            {
+                builder.UsingNameSpaces.Add(@namespace);
+            }
+
             return builder;
+        }
+
+        protected string AssemblyDirectory
+        {
+            get
+            {
+                var codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                var uri = new UriBuilder(codeBase);
+                var path = Uri.UnescapeDataString(uri.Path);
+
+                return Path.Combine(Path.GetDirectoryName(path) ?? throw new InvalidOperationException(), "Generated");
+            }
+        }
+
+        protected virtual void CopyAssembliesForRuntime()
+        {
+            foreach (var assembly in Assemblies)
+            {
+                File.Copy(assembly, Path.Combine(AssemblyDirectory, Path.GetFileName(assembly) ?? throw new InvalidOperationException()), true);
+            }
         }
 
         protected virtual bool ShouldRegisterType(Type type)
         {
-            if (NameSpace == null && type.Namespace == null) return true;
-            if (type.Namespace.StartsWith(NameSpace)) return true;
+            if (Namespace == null && type.Namespace == null) return true;
+            if (type.Namespace.StartsWith(Namespace)) return true;
 
             return false;
         }
