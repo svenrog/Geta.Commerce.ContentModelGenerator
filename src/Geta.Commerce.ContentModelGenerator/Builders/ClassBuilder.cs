@@ -59,16 +59,15 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
 
             foreach (var property in Properties)
             {
-                if (property.Attributes != null)
-                {
-                    foreach (var attribute in property.Attributes)
-                    {
-                        builder.AppendIndentedLine(currentIndent, ComposeAttribute(attribute));
-                    }
+                if (property.Attributes == null) continue;
 
-                    builder.AppendIndentedLine(currentIndent, ComposeProperty(property));
-                    builder.AppendIndentedLine(currentIndent, string.Empty);
+                foreach (var attribute in property.Attributes)
+                {
+                    builder.AppendIndentedLine(currentIndent, ComposeAttribute(attribute));
                 }
+
+                builder.AppendIndentedLine(currentIndent, ComposeProperty(property));
+                builder.AppendIndentedLine(currentIndent, string.Empty);
             }
 
             currentIndent--;
