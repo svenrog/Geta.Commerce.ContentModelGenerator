@@ -17,11 +17,11 @@ namespace Geta.Commerce.ContentModelGenerator.Example
         [Option('p', "path", Required = true, HelpText = "Output path.")]
         public string Path { get; set; }
 
-        [Option('a', "assemblies", Required = true, HelpText = "Assembly path.")]
-        public string Assemblies { get; set; }
-
         [Option('n', "namespace", Required = true, HelpText = "Base namespace.")]
         public string NameSpace { get; set; }
+
+        [Option('a', "assemblies", Required = false, HelpText = "(optional) Assembly path for parsing of existing classes.")]
+        public string Assemblies { get; set; }
 
         [ParserState]
         public IParserState LastParserState { get; set; }
