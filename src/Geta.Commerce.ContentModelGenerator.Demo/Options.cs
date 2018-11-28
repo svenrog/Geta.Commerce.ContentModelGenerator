@@ -14,14 +14,14 @@ namespace Geta.Commerce.ContentModelGenerator.Example
         [Option('b', "generateBaseClasses", Required = false, HelpText = "True if base classes are to be aggregated.")]
         public bool GenerateBaseClasses { get; set; }
 
-        [Option('p', "path", Required = true, HelpText = "Output path.")]
+        [Option('o', "output", Required = true, HelpText = "Output path.")]
         public string Path { get; set; }
 
         [Option('n', "namespace", Required = true, HelpText = "Base namespace.")]
         public string NameSpace { get; set; }
 
-        [Option('a', "assemblies", Required = false, HelpText = "(optional) Assembly path for parsing of existing classes.")]
-        public string Assemblies { get; set; }
+        [Option('p', "project", Required = false, HelpText = "(optional) Path for parsing of existing project.")]
+        public string ProjectPath { get; set; }
 
         [ParserState]
         public IParserState LastParserState { get; set; }

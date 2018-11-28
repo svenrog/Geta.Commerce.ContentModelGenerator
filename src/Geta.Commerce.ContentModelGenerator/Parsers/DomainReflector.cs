@@ -1,92 +1,62 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Geta.Commerce.ContentModelGenerator.Builders;
 using Geta.Commerce.ContentModelGenerator.Extensions;
 using Geta.Commerce.ContentModelGenerator.Structure;
-using Microsoft.CodeDom.Providers.DotNetCompilerPlatform;
 
 namespace Geta.Commerce.ContentModelGenerator.Parsers
 {
     /// <summary>
-    /// A simple class parser that handles a single namespace and class inside a file
+    /// A simple class reader that operates on AppDomain level
     /// </summary>
-    public class ClassCompiler
+    public class DomainReflector
     {
-        protected readonly CodeDomProvider CodeProvider;
-        protected readonly CompilerParameters CompilerParameters;
         protected readonly string Namespace;
-        protected readonly string OutputFile;
-        protected readonly string[] Assemblies;
-        protected StreamReader Reader;
+        protected readonly AppDomain Domain;
+        protected readonly DomainProxy DomainProxy;
+        protected readonly Configuration Configuration;
+        protected readonly AssemblyMappingCollection AssemblyMappings;
+        
+        public readonly Type[] Types;
 
-        public ClassCompiler(string assemblyPath, string nameSpace)
+        public DomainReflector(string projectPath, string nameSpace)
         {
-            if (!Directory.Exists(AssemblyDirectory))
-            {
-                Directory.CreateDirectory(AssemblyDirectory);
-            }
+            var currentAssembly = Assembly.GetExecutingAssembly();
+            var assemblyPath = Path.Combine(projectPath, "bin");
+            var configurationPath = Path.Combine(projectPath, "web.config");
+            var configurationMap = new ConfigurationFileMap(configurationPath);
 
-            CodeProvider = new CSharpCodeProvider();
-            OutputFile = $"{AssemblyDirectory}\\Geta.Commerce.ContentModelGenerator.Generated.dll";
-
-            CompilerParameters = new CompilerParameters
-            {
-                OutputAssembly = OutputFile
-            };
-
-            Assemblies = Directory.GetFiles(assemblyPath, "*.dll")
-                                  .Where(x => !x.EndsWith("System.Runtime.dll"))
-                                  .ToArray();
-
-            CompilerParameters.ReferencedAssemblies.Add("System.ComponentModel.DataAnnotations.dll");
-            CompilerParameters.ReferencedAssemblies.AddRange(Assemblies);
+            Configuration = ConfigurationManager.OpenMappedMachineConfiguration(configurationMap);
+            AssemblyMappings = new AssemblyMappingCollection(Configuration);
+            Domain = CreateDomain(projectPath);
+            Domain.Load(currentAssembly.GetName());
 
             Namespace = nameSpace;
-        }
-        
-        public ClassBuilder[] ParseFiles(string[] files)
-        {
-            var result = CodeProvider.CompileAssemblyFromFile(CompilerParameters, files);
 
-            foreach (CompilerError error in result.Errors)
-            {
-                Console.WriteLine(error.ErrorText);
-            }
+            var filePath = Directory.GetFiles(assemblyPath, "*.dll")
+                                    .FirstOrDefault(x => nameSpace.StartsWith(Path.GetFileNameWithoutExtension(x)));
 
-            if (result.Errors.HasErrors)
-            {
-                Console.ReadKey();
-                throw new Exception("Build failed");
-            }
 
-            CopyAssembliesForRuntime();
 
-            return GetBuilders(result.CompiledAssembly);
+            var proxyType = typeof(DomainProxy);
+            DomainProxy = (DomainProxy) Domain.CreateInstanceAndUnwrap(currentAssembly.FullName, proxyType.FullName);
+
+            var assembly = DomainProxy.GetAssembly(filePath);
+
+            Types = assembly?.GetExportedTypes() ?? new Type[0];
         }
 
-        protected virtual ClassBuilder[] GetBuilders(Assembly assembly)
+        public virtual ClassBuilder[] GetBuilders(Type[] types)
         {
             var list = new List<ClassBuilder>();
-            Type[] types;
-
-            try
-            {
-                types = assembly.GetExportedTypes();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message, ex);
-                types = new Type[0];
-            }
 
             foreach (var type in types)
             {
                 if (!ShouldRegisterType(type)) continue;
-                
                 list.Add(GetBuilder(type));
             }
 
@@ -146,24 +116,32 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
             return builder;
         }
 
-        protected string AssemblyDirectory
+        protected AppDomain CreateDomain(string projectPath)
         {
-            get
+            var assemblyPath = Path.Combine(projectPath, "bin");
+            var configurationPath = Path.Combine(projectPath, "web.config");
+            var currentDomain = AppDomain.CurrentDomain;
+            var currentAssembly = Assembly.GetExecutingAssembly();
+            var evidence = currentDomain.Evidence;
+            var domaininfo = new AppDomainSetup
             {
-                var codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                var uri = new UriBuilder(codeBase);
-                var path = Uri.UnescapeDataString(uri.Path);
+                ApplicationBase = assemblyPath,
+                ConfigurationFile = configurationPath,
+                PrivateBinPath = Path.GetDirectoryName(currentAssembly.Location)
+            };
 
-                return Path.Combine(Path.GetDirectoryName(path) ?? throw new InvalidOperationException(), "Generated");
-            }
-        }
+            var domain = AppDomain.CreateDomain("Reflection", evidence, domaininfo);
 
-        protected virtual void CopyAssembliesForRuntime()
-        {
-            foreach (var assembly in Assemblies)
-            {
-                File.Copy(assembly, Path.Combine(AssemblyDirectory, Path.GetFileName(assembly) ?? throw new InvalidOperationException()), true);
-            }
+            //currentDomain.AssemblyResolve += (sender, args) =>
+            //{
+            //    var assemblyName = new AssemblyName(args.Name);
+            //    var transformedName = AssemblyMappings.GetRedirectedAssemblyName(assemblyName);
+            //    var fileName = Path.Combine(assemblyPath, $"{transformedName.Name}.dll");
+
+            //    return DomainProxy.GetAssembly(fileName);
+            //};
+
+            return domain;
         }
 
         protected virtual bool ShouldRegisterType(Type type)
@@ -172,6 +150,35 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
             if (type.Namespace.StartsWith(Namespace)) return true;
 
             return false;
+        }
+
+        
+    }
+
+    public sealed class DomainProxy : MarshalByRefObject
+    {
+        public Assembly GetAssembly(AssemblyName assemblyName)
+        {
+            try
+            {
+                return Assembly.Load(assemblyName);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public Assembly GetAssembly(string assemblyPath)
+        {
+            try
+            {
+                return Assembly.LoadFile(assemblyPath);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
     }
 };

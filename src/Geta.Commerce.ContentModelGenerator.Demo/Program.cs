@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
 using System.Linq;
 using Geta.Commerce.ContentModelGenerator.Access;
 using Geta.Commerce.ContentModelGenerator.Parsers;
-using CommandLine;
 using Geta.Commerce.ContentModelGenerator.Builders;
+using CommandLine;
 
 namespace Geta.Commerce.ContentModelGenerator.Example
 {
@@ -26,7 +25,7 @@ namespace Geta.Commerce.ContentModelGenerator.Example
 
             IDictionary<string, ClassBuilder> builders = null;
 
-            if (!string.IsNullOrEmpty(options.Assemblies))
+            if (!string.IsNullOrEmpty(options.ProjectPath))
             {
                 builders = ReadClasses(options);
             }
@@ -38,9 +37,8 @@ namespace Geta.Commerce.ContentModelGenerator.Example
         {
             try
             {
-                var classCompiler = new ClassCompiler(options.Assemblies, options.NameSpace);
-                var classFiles = Directory.GetFiles(options.Path, "*.cs");
-                var builders = classCompiler.ParseFiles(classFiles);
+                var domainReflector = new DomainReflector(options.ProjectPath, options.NameSpace);
+                var builders = domainReflector.GetBuilders(domainReflector.Types);
 
                 return builders.ToDictionary(x => $"{x.NameSpace}.{x.ClassName}");
             }
