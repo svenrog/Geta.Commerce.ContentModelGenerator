@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Geta.Commerce.ContentModelGenerator.Structure
 {
+    [Serializable]
     public class AttributeDefinition
     {
         public IDictionary<string, string> Properties { get; set; }

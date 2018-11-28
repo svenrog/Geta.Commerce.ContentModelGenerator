@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Geta.Commerce.ContentModelGenerator.Comparers
 {
+    [Serializable]
     public class NameSpaceComparer : IComparer<string>
     {
         public int Compare(string x, string y)

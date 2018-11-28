@@ -1,5 +1,8 @@
-﻿namespace Geta.Commerce.ContentModelGenerator.Structure
+﻿using System;
+
+namespace Geta.Commerce.ContentModelGenerator.Structure
 {
+    [Serializable]
     public enum CommerceContentType
     {
          Product = 0,

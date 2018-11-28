@@ -6,26 +6,27 @@ using Geta.Commerce.ContentModelGenerator.Access;
 using Geta.Commerce.ContentModelGenerator.Parsers;
 using Geta.Commerce.ContentModelGenerator.Builders;
 using CommandLine;
+using System.IO;
+using Geta.Commerce.ContentModelGenerator.Extensions;
 
 namespace Geta.Commerce.ContentModelGenerator.Example
 {
     class Program
     {
         const string ConnectionName = "EcfSqlConnection";
-        const string ConnectionDefaultProvider = "System.Data.SqlClient";
-
+        
         static void Main(string[] args)
         {
             var options = new Options();
             if (!Parser.Default.ParseArguments(args, options))
             {
-                Console.WriteLine("Supply arguments: -p {path} -n {namespace}, type -? for help");
+                Console.WriteLine("Supply arguments: -p {project path} -n {namespace} -o {output path}, type -? for help");
                 return;
             }
 
             IDictionary<string, ClassBuilder> builders = null;
 
-            if (!string.IsNullOrEmpty(options.ProjectPath))
+            if (options.ReflectExistingClasses)
             {
                 builders = ReadClasses(options);
             }
@@ -35,16 +36,22 @@ namespace Geta.Commerce.ContentModelGenerator.Example
 
         static IDictionary<string, ClassBuilder> ReadClasses(Options options)
         {
+            CrossDomainReflector reflector = null;
+
             try
             {
-                var domainReflector = new DomainReflector(options.ProjectPath, options.NameSpace);
-                var builders = domainReflector.GetBuilders(domainReflector.Types);
+                reflector = new CrossDomainReflector(options.ProjectPath, options.NameSpace);
 
-                return builders.ToDictionary(x => $"{x.NameSpace}.{x.ClassName}");
+                var builders = reflector.GetBuilders();
+                return builders.ToDictionary(x => $"{x.NameSpace}.{x.ClassName.ToFileName()}");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                reflector?.Dispose();
             }
 
             return null;
@@ -54,20 +61,10 @@ namespace Geta.Commerce.ContentModelGenerator.Example
         {
             try
             {
-                ConnectionStringSettings configuration;
+                var settings = GetConnectionSettings(options);
+                if (settings == null) throw new ConfigurationErrorsException();
 
-                if (string.IsNullOrEmpty(options.ConnectionString))
-                {
-                    configuration = ConfigurationManager.ConnectionStrings[ConnectionName];
-                }
-                else
-                {
-                    configuration = new ConnectionStringSettings(ConnectionName, options.ConnectionString, options.ConnectionProvider ?? ConnectionDefaultProvider);
-                }
-
-                if (configuration == null) throw new ConfigurationErrorsException();
-
-                DataAccessBase.Initialize(configuration);
+                DataAccessBase.Initialize(settings);
 
                 var exporter = new CommerceInRiverExporter(options.Path, options.NameSpace)
                 {
@@ -80,12 +77,25 @@ namespace Geta.Commerce.ContentModelGenerator.Example
             }
             catch (ConfigurationErrorsException)
             {
-                Console.WriteLine("Provide a connection with name '{0}' in the application configuration or supply a -c argument.", ConnectionName);
+                Console.WriteLine($"Could not find connection '{ConnectionName}' in given project path.");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        static ConnectionStringSettings GetConnectionSettings(Options options)
+        {
+            var configurationPath = Path.Combine(options.ProjectPath, "web.config");
+            var fileMap = new ExeConfigurationFileMap
+            {
+                ExeConfigFilename = configurationPath
+            };
+
+            var configuration = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
+            var connectionSection = configuration?.ConnectionStrings;
+            return connectionSection?.ConnectionStrings[ConnectionName];
         }
     }
 }

@@ -1,29 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Geta.Commerce.ContentModelGenerator.Structure
 {
+    [Serializable]
     public class PropertyDefinition
     {
         public IList<AttributeDefinition> Attributes { get; set; }
 
         public string Name { get; set; } 
         public string Type { get; set; }
-
         public string Lambda { get; set; }
 
-        private ProtectionLevel _protection = ProtectionLevel.Public;
-        public ProtectionLevel Protection { get { return _protection; } set { _protection = value; } }
-
-        private bool _get = true;
-        public bool Get { get { return _get; } set { _get = value; } }
-
-        private bool _set = true;
-        public bool Set { get { return _set; } set { _set = value; } }
+        public ProtectionLevel Protection { get; set; } = ProtectionLevel.Public;
+        public bool Get { get; set; } = true;
+        public bool Set { get; set; } = true;
 
         private bool _virtual = true;
-
-        
-
         public bool Virtual
         {
             get { return _virtual; }

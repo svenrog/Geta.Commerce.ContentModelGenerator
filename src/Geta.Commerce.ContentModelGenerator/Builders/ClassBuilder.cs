@@ -8,6 +8,7 @@ using Geta.Commerce.ContentModelGenerator.Structure;
 
 namespace Geta.Commerce.ContentModelGenerator.Builders
 {
+    [Serializable]
     public class ClassBuilder
     {
         public ISet<string> UsingNameSpaces { get; set; }
