@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using Geta.Commerce.ContentModelGenerator.Access;
 using Geta.Commerce.ContentModelGenerator.Parsers;
@@ -17,7 +18,11 @@ namespace Geta.Commerce.ContentModelGenerator.Example
         
         static void Main(string[] args)
         {
+            var timer = new Stopwatch();
             var options = new Options();
+
+            timer.Start();
+
             if (!Parser.Default.ParseArguments(args, options))
             {
                 Console.Write("Supply arguments: ");
@@ -48,6 +53,13 @@ namespace Geta.Commerce.ContentModelGenerator.Example
             }
 
             GenerateClasses(options, builders);
+
+            timer.Stop();
+
+            Console.Write("Operation done in ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write($"{timer.Elapsed:g}");
+            Console.ResetColor();
         }
 
         static IDictionary<string, ClassBuilder> ReadClasses(Options options)
@@ -61,7 +73,6 @@ namespace Geta.Commerce.ContentModelGenerator.Example
                 reflector = new CrossDomainReflector(options.ProjectPath, options.NameSpace);
 
                 var builders = reflector.GetBuilders();
-                
                 
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.Write("done");
@@ -146,7 +157,7 @@ namespace Geta.Commerce.ContentModelGenerator.Example
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write(Path.Combine(options.ProjectPath, "web.config"));
                 Console.ResetColor();
-                Console.Write($"'.\r\n");
+                Console.WriteLine($"'.");
             }
             catch (ConfigurationErrorsException)
             {
@@ -154,11 +165,11 @@ namespace Geta.Commerce.ContentModelGenerator.Example
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write(ConnectionName);
                 Console.ResetColor();
-                Console.Write("in path '");
+                Console.Write("' in path '");
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write(options.Path);
+                Console.Write(options.ProjectPath);
                 Console.ResetColor();
-                Console.Write($"'.\r\n");
+                Console.WriteLine($"'.");
             }
             catch (Exception ex)
             {
