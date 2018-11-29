@@ -165,12 +165,14 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
 
         protected virtual bool ShouldRegisterType(Type type, string @namespace)
         {
+            if (type == null) return false;
             if (type.IsInterface) return false;
             if (type.IsAbstract) return false;
             if (type.IsEnum) return false;
             if (type.IsPrimitive) return false;
 
             if (@namespace == null && type.Namespace == null) return true;
+            if (type.Namespace == null) return false;
             if (type.Namespace.Equals(@namespace)) return true;
 
             return false;
