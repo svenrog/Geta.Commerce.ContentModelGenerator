@@ -49,7 +49,7 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
             
             AnchorFilePath = Path.Combine(domain.BaseDirectory, proxyAssemblyFileName);
 
-            File.Copy(proxyAssembly.Location, AnchorFilePath);
+            File.Copy(proxyAssembly.Location, AnchorFilePath, true);
             
             return (ReflectionParser) domain.CreateInstanceAndUnwrap(assemblyName, typeName);
         }
