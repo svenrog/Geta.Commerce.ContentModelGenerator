@@ -74,7 +74,10 @@
     <Error Condition="!Exists('..\packages\ILMerge.3.0.21\build\ILMerge.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILMerge.3.0.21\build\ILMerge.props'))" />
   </Target>
   <Target Name="ILMerge" AfterTargets="AfterBuild">
-    <Exec Command="$(ILMergeConsolePath) /out:cmg.$(OutputType) $(AssemblyName).$(OutputType) Geta.Commerce.ContentModelGenerator.dll CommandLine.dll" WorkingDirectory="$(OutputPath)" />
+    <ItemGroup>
+      <BinResources Include="$(OutputPath)\*.dll" />
+    </ItemGroup>
+    <Exec Command="$(ILMergeConsolePath) /out:cmg.$(OutputType) $(AssemblyName).$(OutputType) @(BinResources -> '%(Filename)%(Extension)', ' ')" WorkingDirectory="$(OutputPath)" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
