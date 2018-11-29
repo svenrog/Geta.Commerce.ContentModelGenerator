@@ -131,6 +131,15 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
             if (typeof(float).IsAssignableFrom(argument.ArgumentType))
                 return $"{argument.Value}f";
 
+            if (typeof(uint).IsAssignableFrom(argument.ArgumentType))
+                return $"{argument.Value}u";
+
+            if (typeof(long).IsAssignableFrom(argument.ArgumentType))
+                return $"{argument.Value}L";
+
+            if (typeof(ulong).IsAssignableFrom(argument.ArgumentType))
+                return $"{argument.Value}UL";
+            
             return $"{argument.Value}";
         }
     }
