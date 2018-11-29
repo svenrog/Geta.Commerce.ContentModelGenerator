@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Geta.Commerce.ContentModelGenerator.Builders;
+using Geta.Commerce.ContentModelGenerator.Extensions;
 
 namespace Geta.Commerce.ContentModelGenerator
 {
@@ -51,7 +52,8 @@ namespace Geta.Commerce.ContentModelGenerator
 
         protected string GetExportFilePath(ClassBuilder builder)
         {
-            return string.Concat(ExportDirectoryPath, Path.DirectorySeparatorChar, builder.ClassName, ".cs");
+            var fileName = builder.ClassName.ToFileName();
+            return string.Concat(ExportDirectoryPath, Path.DirectorySeparatorChar, fileName, ".cs");
         }
     }
 }

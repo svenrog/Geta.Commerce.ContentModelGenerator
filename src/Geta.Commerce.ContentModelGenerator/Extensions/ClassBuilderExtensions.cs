@@ -54,7 +54,6 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
                     existingProperty.Get = property.Get;
                     existingProperty.Set = property.Set;
                     existingProperty.Virtual = property.Virtual;
-                    existingProperty.Lambda = property.Lambda;
                     existingProperty.Override = property.Override;
                     existingProperty.Protection = property.Protection;
                 }

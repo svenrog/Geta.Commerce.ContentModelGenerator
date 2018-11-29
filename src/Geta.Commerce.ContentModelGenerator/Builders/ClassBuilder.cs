@@ -8,6 +8,7 @@ using Geta.Commerce.ContentModelGenerator.Structure;
 
 namespace Geta.Commerce.ContentModelGenerator.Builders
 {
+    [Serializable]
     public class ClassBuilder
     {
         public ISet<string> UsingNameSpaces { get; set; }
@@ -16,14 +17,16 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
         public string ClassName { get; set; }
         public string Inherits { get; set; }
 
+        public IList<string> Constraints { get; set; }
         public IList<AttributeDefinition> ClassAttributes { get; set; }
         public IList<PropertyDefinition> Properties { get; set; }
 
-        public ClassBuilder(string className, string nameSpace, string inherits = null)
+        public ClassBuilder(string className, string nameSpace, string inherits = null, IList<string> constraints = null)
         {
             ClassName = className;
             NameSpace = nameSpace;
             Inherits = inherits;
+            Constraints = constraints ?? new List<string>(0);
 
             var comparer = new NameSpaceComparer();
 
@@ -53,7 +56,24 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
                 builder.AppendIndentedLine(currentIndent, ComposeAttribute(attribute));
             }
 
-            builder.AppendIndentedLine(currentIndent, ComposeClassDeclaration(ClassName, Inherits));
+            if (string.IsNullOrEmpty(Inherits) && Constraints.Count == 1)
+            {
+                builder.AppendIndent(currentIndent);
+                builder.Append(ComposeClassDeclaration(ClassName));
+                builder.Append(" ");
+                builder.AppendLine(ComposeConstraint(Constraints[0]));
+            }
+            else
+            {
+                builder.AppendIndentedLine(currentIndent, ComposeClassDeclaration(ClassName, Inherits));
+                currentIndent++;
+                foreach (var constraint in Constraints)
+                {
+                    builder.AppendIndentedLine(currentIndent, ComposeConstraint(constraint));
+                }
+                currentIndent--;
+            }
+            
             builder.AppendIndentedLine(currentIndent, "{");
             currentIndent++;
 
@@ -90,6 +110,11 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
         protected virtual string ComposeNameSpaceDeclaration(string nameSpace)
         {
             return string.Concat("namespace", " ", nameSpace);
+        }
+
+        public virtual string ComposeConstraint(string constraint)
+        {
+            return string.Concat("where ", constraint);
         }
 
         protected virtual string ComposeClassDeclaration(string className, string inherits = null)

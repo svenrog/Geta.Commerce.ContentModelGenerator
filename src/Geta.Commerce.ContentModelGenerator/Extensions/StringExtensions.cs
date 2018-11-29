@@ -32,6 +32,13 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
             return type;
         }
 
+        public static string ToFileName(this string name)
+        {
+            if (name == null) return name;
+            var index = name.IndexOf("<", StringComparison.InvariantCultureIgnoreCase);
+            return index < 0 ? name : name.Substring(0, index);
+        }
+
         public static string ToClassName(this string name)
         {
             if (name == null) return null;
