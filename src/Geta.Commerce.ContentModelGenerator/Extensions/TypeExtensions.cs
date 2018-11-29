@@ -28,21 +28,42 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
 
             return typeName;
         }
+        
+        public static IList<string> ToTypeConstraints(this Type type)
+        {
+            var genericArguments = type.GetGenericArguments();
+            var result = new List<string>(genericArguments.Length);
+            if (genericArguments.Length == 0)
+            {
+                return result;
+            }
+            
+            foreach (var argument in genericArguments)
+            {
+                var argumentName = argument.ToTypeName();
+                var argumentInherits = argument.ToInheritsDeclaration(out var namespaces);
+
+                result.Add($"{argumentName} : {argumentInherits}");
+            }
+
+            return result;
+        }
 
         public static string ToInheritsDeclaration(this Type type, out ISet<string> namespaces)
         {
             var result = new List<string>();
             namespaces = new HashSet<string>();
 
-            // Todo: Extract generic type constraints
-            var constraints = new List<string>();
-
             if (type.BaseType != null)
             {
                 if (type.BaseType.Namespace != null && !namespaces.Contains(type.BaseType.Namespace))
                     namespaces.Add(type.BaseType.Namespace);
 
-                result.Add(type.BaseType.ToTypeName());
+                var typeName = type.BaseType.ToTypeName();
+                if (!typeName.Equals("object"))
+                {
+                    result.Add(typeName);
+                }
             }
             
             var interfaces = type.GetImmediateInterfaces();

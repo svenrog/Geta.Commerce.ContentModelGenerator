@@ -112,7 +112,10 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
         protected virtual ClassBuilder GetBuilder(Type type)
         {
             var typeName = type.ToTypeName();
-            var builder = new ClassBuilder(typeName, type.Namespace, type.ToInheritsDeclaration(out ISet<string> namespaces));
+            var typeInherits = type.ToInheritsDeclaration(out ISet<string> namespaces);
+            var typeConstraints = type.ToTypeConstraints();
+            
+            var builder = new ClassBuilder(typeName, type.Namespace, typeInherits, typeConstraints);
 
             var classAttributes = type.GetCustomAttributesData();
             foreach (var attribute in classAttributes)
@@ -125,6 +128,7 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
             }
 
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic);
+
             foreach (var property in properties)
             {
                 var definition = new PropertyDefinition
@@ -151,7 +155,7 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
                 definition.Set = property.SetMethod != null;
                 definition.Virtual = property.GetMethod?.IsVirtual ?? false;
                 definition.Override = !property.GetMethod?.Equals(property.GetMethod?.GetBaseDefinition()) ?? false;
-
+                
                 builder.Properties.Add(definition);
             }
 

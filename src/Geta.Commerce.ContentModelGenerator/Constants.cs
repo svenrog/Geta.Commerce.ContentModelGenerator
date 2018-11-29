@@ -32,7 +32,8 @@ namespace Geta.Commerce.ContentModelGenerator
             { "Decimal", "decimal" },
             { "String", "string" },
             { "Char", "char" },
-            { "Enum", "enum" }
+            { "Enum", "enum" },
+            { "Object", "object" }
         };
 
         public static readonly IDictionary<string, string> TypeMappings = new Dictionary<string, string>

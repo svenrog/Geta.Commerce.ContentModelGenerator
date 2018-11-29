@@ -11,6 +11,7 @@ namespace Geta.Commerce.ContentModelGenerator.Structure
         public string Name { get; set; } 
         public string Type { get; set; }
         public string Lambda { get; set; }
+        public string Default { get; set; }
 
         public ProtectionLevel Protection { get; set; } = ProtectionLevel.Public;
         public bool Get { get; set; } = true;
