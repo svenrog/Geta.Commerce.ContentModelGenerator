@@ -15,6 +15,7 @@ namespace Geta.Commerce.ContentModelGenerator.Example
     class Program
     {
         const string ConnectionName = "EcfSqlConnection";
+        const string ConnectionDefaultProvider = "System.Data.SqlClient";
         
         static void Main(string[] args)
         {
@@ -107,10 +108,21 @@ namespace Geta.Commerce.ContentModelGenerator.Example
         {
             try
             {
-                Console.Write("Reading configuration... ");
+                ConnectionStringSettings settings;
 
-                var configuration = GetConfiguration(options) ?? throw new FileNotFoundException();
-                var settings = GetConnectionSettings(configuration) ?? throw new ConfigurationErrorsException();
+                if (string.IsNullOrEmpty(options.ConnectionString))
+                {
+                    Console.Write("Reading configuration from web.config... ");
+
+                    var configuration = GetConfiguration(options) ?? throw new FileNotFoundException();
+                    settings = GetConnectionSettings(configuration) ?? throw new ConfigurationErrorsException();
+                }
+                else
+                {
+                    Console.Write("Creating configuration... ");
+
+                    settings = new ConnectionStringSettings(ConnectionName, options.ConnectionString, options.ConnectionProvider ?? ConnectionDefaultProvider);
+                }
 
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine("done");
