@@ -19,7 +19,7 @@ Also contains a content model generator aimed at exporting EPiServer Commerce co
 | -o | -output | yes | Output path 
 | -n | -namespace | yes | The namespace for the generated classes
 | -p | -project | no | Path to the EPiServer web project
-| -c | -connectionString | no | Override connectionstring (if not same as project web.config)
+| -c | -connectionString | no | Override connection string (if not same as project web.config)
 | -v | -connectionProvider | no | Override connection provider name (if other than SQL)
 | -b | -generateBaseClasses | no | Aggregates common properties into base classes
 | -r | -reflectExistingClases | no | Merges reflected properties (from project) with database content types
