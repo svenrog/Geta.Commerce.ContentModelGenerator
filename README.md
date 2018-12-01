@@ -22,7 +22,7 @@ Also contains a content model generator aimed at exporting EPiServer Commerce co
 | -c | -connectionString | no | Override connection string (if not same as project web.config)
 | -v | -connectionProvider | no | Override connection provider name (if other than SQL)
 | -b | -generateBaseClasses | no | Aggregates common properties into base classes
-| -r | -reflectExistingClases | no | Merges reflected properties (from project) with database content types
+| -r | -reflectExistingClasses | no | Merges reflected properties (from project) with database content types
 
 ### Examples
 In this case we want to just generate classes from Commerce
