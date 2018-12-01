@@ -42,8 +42,19 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
         public static string ToClassName(this string name)
         {
             if (name == null) return null;
-            var index = name.LastIndexOf("_", StringComparison.InvariantCulture);
-            return index < 0 ? name : name.Substring(index + 1);
+
+            while (true)
+            {
+                var index = name.IndexOf("_", StringComparison.InvariantCulture);
+                if (index < 0) return name;
+
+                var prefix = name.Substring(0, index);
+                name = name.Substring(index + 1);
+
+                if (name.StartsWith(prefix)) continue;
+
+                name = prefix + name;
+            }
         }
 
         public static bool IsValidType(this string type)
