@@ -11,9 +11,9 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
     [Serializable]
     public class ClassBuilder
     {
-        public ISet<string> UsingNameSpaces { get; set; }
+        public ISet<string> UsingNamespaces { get; set; }
 
-        public string NameSpace { get; set; }
+        public string Namespace { get; set; }
         public string ClassName { get; set; }
         public string Inherits { get; set; }
 
@@ -21,16 +21,16 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
         public IList<AttributeDefinition> ClassAttributes { get; set; }
         public IList<PropertyDefinition> Properties { get; set; }
 
-        public ClassBuilder(string className, string nameSpace, string inherits = null, IList<string> constraints = null)
+        public ClassBuilder(string className, string @namespace, string inherits = null, IList<string> constraints = null)
         {
             ClassName = className;
-            NameSpace = nameSpace;
+            Namespace = @namespace;
             Inherits = inherits;
             Constraints = constraints ?? new List<string>(0);
 
             var comparer = new NameSpaceComparer();
 
-            UsingNameSpaces = new SortedSet<string>(comparer);
+            UsingNamespaces = new SortedSet<string>(comparer);
             ClassAttributes = new List<AttributeDefinition>();
             Properties = new List<PropertyDefinition>();
         }
@@ -40,13 +40,13 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
             var builder = new StringBuilder();
             var currentIndent = 0;
 
-            foreach (var nameSpace in UsingNameSpaces)
+            foreach (var @namespace in UsingNamespaces)
             {
-                builder.AppendLine(ComposeUsingDeclaration(nameSpace));
+                builder.AppendLine(ComposeUsingDeclaration(@namespace));
             }
 
             builder.AppendLine();
-            builder.AppendLine(ComposeNameSpaceDeclaration(NameSpace));
+            builder.AppendLine(ComposeNameSpaceDeclaration(Namespace));
 
             builder.AppendLine("{");
             currentIndent++;
@@ -102,14 +102,14 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
             return new HashSet<string>(StringComparer.Ordinal);
         }
 
-        protected virtual string ComposeUsingDeclaration(string nameSpace)
+        protected virtual string ComposeUsingDeclaration(string @namespace)
         {
-            return string.Concat("using ", nameSpace, ";");
+            return string.Concat("using ", @namespace, ";");
         }
 
-        protected virtual string ComposeNameSpaceDeclaration(string nameSpace)
+        protected virtual string ComposeNameSpaceDeclaration(string @namespace)
         {
-            return string.Concat("namespace", " ", nameSpace);
+            return string.Concat("namespace ", @namespace);
         }
 
         public virtual string ComposeConstraint(string constraint)

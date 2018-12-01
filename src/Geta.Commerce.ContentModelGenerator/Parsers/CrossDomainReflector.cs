@@ -22,13 +22,13 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
 
         protected string AnchorFilePath;
         
-        public CrossDomainReflector(string projectPath, string nameSpace)
+        public CrossDomainReflector(string projectPath, string @namespace)
         {
             var assemblyPath = Path.Combine(projectPath, "bin");
             var filePath = Directory.GetFiles(assemblyPath, "*.dll")
-                .FirstOrDefault(x => nameSpace.StartsWith(Path.GetFileNameWithoutExtension(x)));
+                .FirstOrDefault(x => @namespace.StartsWith(Path.GetFileNameWithoutExtension(x)));
 
-            Namespace = nameSpace;
+            Namespace = @namespace;
             TargetAssemblyPath = filePath;
             Domain = CreateDomain(projectPath);
             Parser = CreateParser(Domain);
@@ -161,7 +161,7 @@ namespace Geta.Commerce.ContentModelGenerator.Parsers
 
             foreach (var @namespace in namespaces)
             {
-                builder.UsingNameSpaces.Add(@namespace);
+                builder.UsingNamespaces.Add(@namespace);
             }
 
             return builder;

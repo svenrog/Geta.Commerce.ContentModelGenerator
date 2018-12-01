@@ -6,7 +6,7 @@ namespace Geta.Commerce.ContentModelGenerator
     public interface IExporter
     {
         string ExportDirectoryPath { get; set; }
-        string NameSpace { get; set; }
+        string Namespace { get; set; }
 
         void Export(IEnumerable<ClassBuilder> builders);
     }

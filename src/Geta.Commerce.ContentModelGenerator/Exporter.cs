@@ -10,12 +10,12 @@ namespace Geta.Commerce.ContentModelGenerator
     public abstract class Exporter : IExporter
     {
         public string ExportDirectoryPath { get; set; }
-        public string NameSpace { get; set; }
+        public string Namespace { get; set; }
 
-        protected Exporter(string path, string nameSpace)
+        protected Exporter(string path, string @namespace)
         {
             ExportDirectoryPath = path;
-            NameSpace = nameSpace;
+            Namespace = @namespace;
 
             ThrowErrorIfMisconfigured();
         }
@@ -27,7 +27,7 @@ namespace Geta.Commerce.ContentModelGenerator
 
         protected void ThrowErrorIfMisconfigured()
         {
-            if (string.IsNullOrWhiteSpace(NameSpace))
+            if (string.IsNullOrWhiteSpace(Namespace))
             {
                 throw new ArgumentException("Namespace needs to be set");
             }

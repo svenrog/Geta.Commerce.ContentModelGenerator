@@ -7,10 +7,10 @@ namespace Geta.Commerce.ContentModelGenerator.Extensions
     {
         public static ClassBuilder Merge(this ClassBuilder first, ClassBuilder second)
         {
-            foreach (var nameSpace in second.UsingNameSpaces)
+            foreach (var @namespace in second.UsingNamespaces)
             {
-                if (first.UsingNameSpaces.Contains(nameSpace)) continue;
-                first.UsingNameSpaces.Add(nameSpace);
+                if (first.UsingNamespaces.Contains(@namespace)) continue;
+                first.UsingNamespaces.Add(@namespace);
             }
 
             foreach (var attribute in second.ClassAttributes)

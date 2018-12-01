@@ -8,7 +8,7 @@ namespace Geta.Commerce.ContentModelGenerator
     {
         private const string _metaFilter = "From inRiver";
 
-        public CommerceInRiverExporter(string path, string nameSpace) : base(path, nameSpace) {}
+        public CommerceInRiverExporter(string path, string @namespace) : base(path, @namespace) {}
 
         protected override IList<MetaClass> GetMetaClasses()
         {

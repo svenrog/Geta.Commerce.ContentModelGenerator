@@ -12,7 +12,7 @@ namespace Geta.Commerce.ContentModelGenerator
     {
         public bool GenerateBaseClasses { get; set; }
 
-        public CommerceExporter(string path, string nameSpace) : base(path, nameSpace) {}
+        public CommerceExporter(string path, string @namespace) : base(path, @namespace) {}
 
         public override void Export(IEnumerable<ClassBuilder> builders)
         {
@@ -123,12 +123,12 @@ namespace Geta.Commerce.ContentModelGenerator
 
         protected virtual string GetFullName(ClassBuilder builder)
         {
-            return $"{NameSpace}.{builder.ClassName}";
+            return $"{Namespace}.{builder.ClassName}";
         }
 
         protected virtual ClassBuilder GetBaseClassBuilder(CommerceContentType type, IEnumerable<MetaField> metaFields)
         {
-            var builder = new CommerceContentModelBuilder($"{type}ContentBase", NameSpace);
+            var builder = new CommerceContentModelBuilder($"{type}ContentBase", Namespace);
 
             builder.SetContentType(type);
 
@@ -142,7 +142,7 @@ namespace Geta.Commerce.ContentModelGenerator
             var name = metaClass.Name.ToClassName();
             var metaName = metaClass.TableName.ToMetaNameFromTable();
             
-            var builder = new CommerceContentModelBuilder(name, NameSpace, inherits);
+            var builder = new CommerceContentModelBuilder(name, Namespace, inherits);
 
             if (inherits == null)
             {
@@ -241,9 +241,9 @@ namespace Geta.Commerce.ContentModelGenerator
             if (Constants.UsingDirectives.ContainsKey(type))
             {
                 var directive = Constants.UsingDirectives[type];
-                if (!builder.UsingNameSpaces.Contains(directive))
+                if (!builder.UsingNamespaces.Contains(directive))
                 {
-                    builder.UsingNameSpaces.Add(directive);
+                    builder.UsingNamespaces.Add(directive);
                 }
             }
         }

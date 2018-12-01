@@ -8,19 +8,19 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
 {
     public class EPiServerContentModelBuilder : ClassBuilder
     {
-        public EPiServerContentModelBuilder(string className, string nameSpace, string inherits = null) : base(className, nameSpace, inherits)
+        public EPiServerContentModelBuilder(string className, string @namespace, string inherits = null) : base(className, @namespace, inherits)
         {
-            UsingNameSpaces.Add("System");
-            UsingNameSpaces.Add("System.Collections.Generic");
-            UsingNameSpaces.Add("System.ComponentModel.DataAnnotations");
-            UsingNameSpaces.Add("EPiServer");
-            UsingNameSpaces.Add("EPiServer.Core");
-            UsingNameSpaces.Add("EPiServer.DataAnnotations");
+            UsingNamespaces.Add("System");
+            UsingNamespaces.Add("System.Collections.Generic");
+            UsingNamespaces.Add("System.ComponentModel.DataAnnotations");
+            UsingNamespaces.Add("EPiServer");
+            UsingNamespaces.Add("EPiServer.Core");
+            UsingNamespaces.Add("EPiServer.DataAnnotations");
         }
 
         protected virtual Guid GetContentTypeGuid()
         {
-            var input = string.Concat(NameSpace, ".", ClassName);
+            var input = string.Concat(Namespace, ".", ClassName);
             var bytes = Encoding.UTF8.GetBytes(input);
 
             Guid result;

@@ -9,8 +9,8 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
     {
         public CommerceContentModelBuilder(string className, string nameSpace, string inherits = null) : base(className, nameSpace, inherits)
         {
-            UsingNameSpaces.Add("EPiServer.Commerce.Catalog.DataAnnotations");
-            UsingNameSpaces.Add("Mediachase.Commerce");
+            UsingNamespaces.Add("EPiServer.Commerce.Catalog.DataAnnotations");
+            UsingNamespaces.Add("Mediachase.Commerce");
         }
 
         public virtual void SetContentType(CommerceContentType type)
@@ -25,8 +25,8 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
                 case CommerceContentType.Package: Inherits = "PackageContent"; break;
             }
 
-            if (!UsingNameSpaces.Contains("EPiServer.Commerce.Catalog.ContentTypes"))
-                UsingNameSpaces.Add("EPiServer.Commerce.Catalog.ContentTypes");
+            if (!UsingNamespaces.Contains("EPiServer.Commerce.Catalog.ContentTypes"))
+                UsingNamespaces.Add("EPiServer.Commerce.Catalog.ContentTypes");
         }
 
         public override ISet<string> GetProtectedProperties()
@@ -43,12 +43,12 @@ namespace Geta.Commerce.ContentModelGenerator.Builders
             return properties;
         }
 
-        public virtual AttributeDefinition GetContentTypeAttribute(string name, string metaclass, string description = null)
+        public virtual AttributeDefinition GetContentTypeAttribute(string name, string metaClass, string description = null)
         {
             var attribute = base.GetContentTypeAttribute(name, description);
 
             attribute.Name = "CatalogContentType";
-            attribute.Properties.Add("MetaClassName", metaclass.AppendQuotes());
+            attribute.Properties.Add("MetaClassName", metaClass.AppendQuotes());
 
             return attribute;
         }

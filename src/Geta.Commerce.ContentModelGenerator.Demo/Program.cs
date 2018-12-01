@@ -84,7 +84,7 @@ namespace Geta.Commerce.ContentModelGenerator.Example
                 Console.ResetColor();
                 Console.WriteLine(" items).");
 
-                return builders.GroupBy(x => $"{x.NameSpace}.{x.ClassName.ToFileName()}")
+                return builders.GroupBy(x => $"{x.Namespace}.{x.ClassName.ToFileName()}")
                                .ToDictionary(x => x.Key, x => x.Last());
             }
             catch (Exception ex)
